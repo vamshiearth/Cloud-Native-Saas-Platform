@@ -38,20 +38,49 @@ jobs:
     runs-on: ubuntu-latest
     needs: detect
     if: ${{ needs.detect.outputs.backend == 'true' }}
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: app
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/app
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
+      DJANGO_DEBUG: "true"
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Install deps
         run: |
           cd backend
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Sanity check
+          pip install -r requirements.txt
+
+      - name: Run migrations
         run: |
           cd backend
-          python -m compileall .
+          python manage.py migrate
+
+      - name: Run tests
+        run: |
+          cd backend
+          pytest
 
   frontend:
     name: Frontend (React)

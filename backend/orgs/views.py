@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from .permissions import require_role
-from .models import Organization, Membership
+from .models import Organization, Membership, Project
 
 
 
