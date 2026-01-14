@@ -1,4 +1,5 @@
 const ACCESS_KEY = "access_token";
+const REFRESH_KEY = "refresh_token";
 const ORG_KEY = "org_id";
 
 export function setAccessToken(token) {
@@ -9,6 +10,16 @@ export function getAccessToken() {
 }
 export function clearAccessToken() {
   localStorage.removeItem(ACCESS_KEY);
+}
+
+export function setRefreshToken(token) {
+  localStorage.setItem(REFRESH_KEY, token);
+}
+export function getRefreshToken() {
+  return localStorage.getItem(REFRESH_KEY);
+}
+export function clearRefreshToken() {
+  localStorage.removeItem(REFRESH_KEY);
 }
 
 export function setOrgId(orgId) {
