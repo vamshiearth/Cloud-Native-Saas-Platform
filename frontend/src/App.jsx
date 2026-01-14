@@ -12,6 +12,12 @@ export default function App() {
 
   const token = getAccessToken();
 
+  const [projects, setProjects] = useState([]);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("member");
+
+
   async function loadMe() {
     const res = await api.get("/api/auth/me/");
     setMe(res.data);
@@ -68,7 +74,9 @@ export default function App() {
   async function chooseOrg(id) {
     setOrgId(id);
     await loadCurrentOrg();
+    await loadProjects();
   }
+
 
   async function createOrg() {
     if (!newOrgName.trim()) return;
@@ -77,9 +85,29 @@ export default function App() {
     await loadOrgs();
   }
 
+
+  async function loadProjects() {
+    const res = await api.get("/api/projects/");
+    setProjects(res.data);
+  }
+
+  async function createProject() {
+    if (!newProjectName.trim()) return;
+    await api.post("/api/projects/", { name: newProjectName.trim() });
+    setNewProjectName("");
+    await loadProjects();
+  }
+
+  async function invite() {
+    if (!inviteEmail.trim()) return;
+    await api.post("/api/orgs/invite/", { email: inviteEmail.trim(), role: inviteRole });
+    setInviteEmail("");
+  }
+
+
   useEffect(() => {
     if (!token) return;
-    loadMe().then(loadOrgs).then(loadCurrentOrg).catch(() => logout());
+    loadMe().then(loadOrgs).then(loadCurrentOrg).then(loadProjects).catch(() => logout());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -135,6 +163,38 @@ export default function App() {
             <input value={newOrgName} onChange={(e) => setNewOrgName(e.target.value)} placeholder="New org name" />
             <button onClick={createOrg}>Create Org</button>
           </div>
+
+          <hr style={{ margin: "16px 0" }} />
+          <h2>Projects</h2>
+
+          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+            <input value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} placeholder="New project name" />
+            <button onClick={createProject}>Create Project</button>
+          </div>
+
+          <div style={{ display: "grid", gap: 8 }}>
+            {projects.map((p) => (
+              <div key={p.id} style={{ padding: 12, border: "1px solid #444", borderRadius: 12 }}>
+                {p.name}
+              </div>
+            ))}
+          </div>
+
+          <hr style={{ margin: "16px 0" }} />
+          <h2>Invite Member</h2>
+
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="Email to invite" />
+            <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}>
+              <option value="member">member</option>
+              <option value="admin">admin</option>
+              <option value="owner">owner</option>
+            </select>
+            <button onClick={invite}>Invite</button>
+          </div>
+          <p style={{ fontSize: 12, opacity: 0.8 }}>
+            Owner/Admin only. If user doesn't exist, API returns 202 (email sending later).
+          </p>
         </>
       )}
     </div>

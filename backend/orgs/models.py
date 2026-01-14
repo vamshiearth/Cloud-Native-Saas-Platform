@@ -31,3 +31,15 @@ class Membership(models.Model):
 
     def __str__(self):
         return f"{self.user} -> {self.org} ({self.role})"
+
+
+class Project(models.Model):
+    org = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="projects")
+    name = models.CharField(max_length=120)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("org", "name")
+
+    def __str__(self):
+        return f"{self.org.name}: {self.name}"
