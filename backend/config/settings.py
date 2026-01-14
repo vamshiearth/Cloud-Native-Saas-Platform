@@ -112,12 +112,14 @@ STATIC_URL = 'static/'
 import os
 import dj_database_url
 from dotenv import load_dotenv
+from corsheaders.defaults import default_headers
 
 load_dotenv()
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 CORS_ALLOW_ALL_ORIGINS = True  # we'll tighten later
+CORS_ALLOW_HEADERS = list(default_headers) + ["X-Org-Id"]
 
 database_url = os.getenv("DATABASE_URL")
 if database_url:
